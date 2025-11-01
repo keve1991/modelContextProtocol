@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
+// ReSharper disable once CheckNamespace
 namespace ModelContextProtocol;
 
 /// <summary>Provides a collection of utility methods for working with JSON data in the context of MCP.</summary>

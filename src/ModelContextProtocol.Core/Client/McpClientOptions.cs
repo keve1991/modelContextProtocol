@@ -1,4 +1,5 @@
 using ModelContextProtocol.Protocol;
+#pragma warning disable CS9264 // Non-nullable property must contain a non-null value when exiting constructor. Consider adding the 'required' modifier, or declaring the property as nullable, or adding '[field: MaybeNull, AllowNull]' attributes.
 
 namespace ModelContextProtocol.Client;
 

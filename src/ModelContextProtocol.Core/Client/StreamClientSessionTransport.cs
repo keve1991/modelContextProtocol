@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
 using System.Text;
 using System.Text.Json;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
 
 namespace ModelContextProtocol.Client;
 

@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.AI;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace ModelContextProtocol.Client;
 
@@ -487,7 +488,7 @@ public abstract partial class McpClient : McpSession, IMcpClient
     /// <summary>
     /// Invokes a tool on the server.
     /// </summary>
-    /// <param name="toolName">The name of the tool to call on the server..</param>
+    /// <param name="toolName">The name of the tool to call on the server.</param>
     /// <param name="arguments">An optional dictionary of arguments to pass to the tool.</param>
     /// <param name="progress">Optional progress reporter for server notifications.</param>
     /// <param name="serializerOptions">JSON serializer options.</param>
@@ -532,7 +533,7 @@ public abstract partial class McpClient : McpSession, IMcpClient
             await using var _ = RegisterNotificationHandler(NotificationMethods.ProgressNotification,
                 (notification, cancellationToken) =>
                 {
-                    if (JsonSerializer.Deserialize(notification.Params, McpJsonUtilities.JsonContext.Default.ProgressNotificationParams) is { } pn &&
+                    if (System.Text.Json.JsonSerializer.Deserialize(notification.Params, McpJsonUtilities.JsonContext.Default.ProgressNotificationParams) is { } pn &&
                         pn.ProgressToken == progressToken)
                     {
                         progress.Report(pn.Progress);
@@ -696,15 +697,22 @@ public abstract partial class McpClient : McpSession, IMcpClient
     private static Dictionary<string, JsonElement>? ToArgumentsDictionary(
         IReadOnlyDictionary<string, object?>? arguments, JsonSerializerOptions options)
     {
-        var typeInfo = options.GetTypeInfo<object?>();
-
         Dictionary<string, JsonElement>? result = null;
         if (arguments is not null)
         {
             result = new(arguments.Count);
             foreach (var kvp in arguments)
             {
-                result.Add(kvp.Key, kvp.Value is JsonElement je ? je : JsonSerializer.SerializeToElement(kvp.Value, typeInfo));
+                if (kvp.Value is JsonElement je)
+                {
+                    result.Add(kvp.Key, je);
+                }
+                else
+                {
+                    string json = JsonConvert.SerializeObject(kvp.Value);
+                    JsonElement element = JsonDocument.Parse(json).RootElement;
+                    result.Add(kvp.Key, element);
+                }
             }
         }
 
